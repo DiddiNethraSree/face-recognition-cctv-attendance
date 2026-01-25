@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="dashboard">
+    <h2>Staff Attendance Panel</h2>
+
+    <h3>Eligible (>75%)</h3>
+    <ul>{% for s,p in eligible %}<li>{{ s }} - {{ p }}%</li>{% endfor %}</ul>
+
+    <h3>Condonation (65–75%)</h3>
+    <ul>{% for s,p in condonation %}<li>{{ s }} - {{ p }}%</li>{% endfor %}</ul>
+
+    <h3>Detained (<65%)</h3>
+    <ul>{% for s,p in detained %}<li>{{ s }} - {{ p }}%</li>{% endfor %}</ul>
+</div>
+</body>
+</html>

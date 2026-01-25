@@ -1,0 +1,13 @@
+# Virtual environment
+venv/
+
+# Face data
+clean_faces/
+
+# Database & generated files
+attendance.db
+encodings.pickle
+
+# Python cache
+__pycache__/
+*.pyc
