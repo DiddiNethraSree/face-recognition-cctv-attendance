@@ -81,13 +81,8 @@ cap.release()
 cv2.destroyAllWindows()
 
 # ---------------- FINAL SUMMARY ----------------
-absent_students = all_students - present_students
-
-print("\n📊 ATTENDANCE SUMMARY")
+print("\n📊 ATTENDANCE SUMMARY (PRESENT ONLY)")
 print(f"Present: {len(present_students)}")
-for s in present_students:
+for s in sorted(present_students):
     print(" ✔", s)
 
-print(f"\nAbsent: {len(absent_students)}")
-for s in absent_students:
-    print(" ✖", s)

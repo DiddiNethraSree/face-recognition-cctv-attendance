@@ -17,21 +17,29 @@ def login():
         password = request.form.get("password")
         role = request.form.get("role")
 
-        # simple demo validation
-        if role == "student" and password == "stud123":
+        con = sqlite3.connect(DB)
+        cur = con.cursor()
+
+        cur.execute(
+            "SELECT role FROM users WHERE user_id=? AND password=?",
+            (user_id, password)
+        )
+        row = cur.fetchone()
+        con.close()
+
+        if row and row[0] == role:
             session["user_id"] = user_id
             session["role"] = role
-            return redirect("/student")
 
-        elif role == "staff" and password == "staff123":
-            session["user_id"] = user_id
-            session["role"] = role
-            return redirect("/staff")
+            if role == "student":
+                return redirect("/student")
+            else:
+                return redirect("/staff")
 
-        else:
-            return "Invalid credentials"
+        return "Invalid credentials"
 
     return render_template("login.html")
+
 
 # ---------- STAFF DASHBOARD ----------
 @app.route("/staff")
