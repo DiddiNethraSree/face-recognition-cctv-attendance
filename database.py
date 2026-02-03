@@ -19,6 +19,24 @@ def init_db():
     )
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        user_id TEXT PRIMARY KEY,
+        password TEXT,
+        role TEXT
+    )
+    """)
+
+    # Seed some default users if not exists
+    users = [
+        ('student1', '123', 'student'),
+        ('student2', '123', 'student'),
+        ('student3', '123', 'student'),
+        ('staff1', '123', 'staff'),
+        ('hod1', '123', 'hod')
+    ]
+    cursor.executemany("INSERT OR IGNORE INTO users VALUES (?, ?, ?)", users)
+
     conn.commit()
     conn.close()
 

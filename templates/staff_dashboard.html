@@ -1,21 +1,60 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Staff Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-<div class="dashboard">
-    <h2>Staff Attendance Panel</h2>
+{% extends "base.html" %}
 
-    <h3>Eligible (>75%)</h3>
-    <ul>{% for s,p in eligible %}<li>{{ s }} - {{ p }}%</li>{% endfor %}</ul>
+{% block content %}
+<div class="app-container">
+    <div class="main-content">
+        <div class="dashboard-header">
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">Staff Dashboard</h1>
+                <p style="color: var(--text-muted);">Real-time Student Monitoring</p>
+            </div>
+        </div>
 
-    <h3>Condonation (65–75%)</h3>
-    <ul>{% for s,p in condonation %}<li>{{ s }} - {{ p }}%</li>{% endfor %}</ul>
-
-    <h3>Detained (<65%)</h3>
-    <ul>{% for s,p in detained %}<li>{{ s }} - {{ p }}%</li>{% endfor %}</ul>
+        <div class="card-panel fade-in">
+            <div class="panel-header">
+                Student Attendance Records
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Attendance %</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s, p in students %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ s }}</td>
+                            <td>{{ p }}%</td>
+                            <td style="width: 40%;">
+                                <div class="progress-container">
+                                    <div class="progress-bar {% if p > 75 %}bg-success{% elif p >= 65 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ p }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if p > 75 %}
+                                    <span class="status-badge status-success">Eligible</span>
+                                {% elif p >= 65 %}
+                                    <span class="status-badge status-warning">Condonation</span>
+                                {% else %}
+                                    <span class="status-badge status-danger">Detained</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                No student records found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-</body>
-</html>
+{% endblock %}

@@ -1,8 +1,12 @@
 from flask import Flask, render_template, request, redirect, session
 import sqlite3
+import database
 
 app = Flask(__name__)
 app.secret_key = "attendance_secret"
+
+# Initialize DB on startup
+database.init_db()
 
 DB = "attendance.db"
 
@@ -33,18 +37,20 @@ def login():
 
             if role == "student":
                 return redirect("/student")
-            else:
+            elif role == "staff":
                 return redirect("/staff")
+            elif role == "hod":
+                return redirect("/hod")
 
-        return "Invalid credentials"
+        return render_template("login.html", error="Invalid credentials")
 
     return render_template("login.html")
 
 
-# ---------- STAFF DASHBOARD ----------
-@app.route("/staff")
-def staff():
-    if session.get("role") != "staff":
+# ---------- HOD DASHBOARD ----------
+@app.route("/hod")
+def hod():
+    if session.get("role") != "hod":
         return redirect("/")
 
     con = get_db()
@@ -63,10 +69,34 @@ def staff():
     detained = [d for d in data if d[1] < 65]
 
     return render_template(
-        "staff_dashboard.html",
+        "hod_dashboard.html",
         eligible=eligible,
         condonation=condonation,
         detained=detained
+    )
+
+
+# ---------- STAFF DASHBOARD ----------
+@app.route("/staff")
+def staff():
+    if session.get("role") != "staff":
+        return redirect("/")
+
+    con = get_db()
+    cur = con.cursor()
+    # Staff sees all students and their attendance percentage
+    cur.execute("""
+        SELECT student_id,
+               ROUND(SUM(present)*100.0/COUNT(*),2) AS percent
+        FROM attendance
+        GROUP BY student_id
+    """)
+    data = cur.fetchall()
+    con.close()
+
+    return render_template(
+        "staff_dashboard.html",
+        students=data
     )
 
 # ---------- STUDENT DASHBOARD ----------

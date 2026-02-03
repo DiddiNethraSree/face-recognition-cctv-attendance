@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="app-container">
+    <div class="main-content">
+        <div class="dashboard-header">
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">HOD Dashboard</h1>
+                <p style="color: var(--text-muted);">Department Overview & Eligibility Reports</p>
+            </div>
+            <div style="text-align: right;">
+                <span class="status-badge" style="background: #e0e7ff; color: var(--primary);">System Online ●</span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card" style="border-left: 4px solid var(--success);">
+                <div class="stat-label">Eligible (>75%)</div>
+                <div class="stat-value">{{ eligible|length }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Students</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid var(--warning);">
+                <div class="stat-label">Condonation (65-75%)</div>
+                <div class="stat-value">{{ condonation|length }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Students</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid var(--danger);">
+                <div class="stat-label">Detained (<65%)</div>
+                <div class="stat-value">{{ detained|length }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Students</div>
+            </div>
+        </div>
+
+        <div class="hod-grid">
+            <!-- Eligible -->
+            <div class="card-panel">
+                <div class="panel-header" style="color: var(--success); border-top: 3px solid var(--success);">
+                    ✅ Eligible List
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        {% if eligible %}
+                            {% for s, p in eligible %}
+                            <tr>
+                                <td><b>{{ s }}</b></td>
+                                <td style="text-align: right;">
+                                    <span class="status-badge status-success">{{ p }}%</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Empty</td></tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+
+            <!-- Condonation -->
+            <div class="card-panel">
+                <div class="panel-header" style="color: var(--warning); border-top: 3px solid var(--warning);">
+                    ⚠️ Condonation List
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        {% if condonation %}
+                            {% for s, p in condonation %}
+                            <tr>
+                                <td><b>{{ s }}</b></td>
+                                <td style="text-align: right;">
+                                    <span class="status-badge status-warning">{{ p }}%</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Empty</td></tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detained -->
+            <div class="card-panel">
+                <div class="panel-header" style="color: var(--danger); border-top: 3px solid var(--danger);">
+                    🚫 Detained List
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        {% if detained %}
+                            {% for s, p in detained %}
+                            <tr>
+                                <td><b>{{ s }}</b></td>
+                                <td style="text-align: right;">
+                                    <span class="status-badge status-danger">{{ p }}%</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Empty</td></tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
