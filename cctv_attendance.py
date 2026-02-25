@@ -2,8 +2,9 @@ import cv2
 import face_recognition
 import pickle
 import numpy as np
-from datetime import datetime
-from database import init_today, mark_present
+from datetime import datetime, time
+from zoneinfo import ZoneInfo
+from database import init_today, mark_present, is_working_day
 
 # ---------------- CONFIG ----------------
 THRESHOLD = 0.45
@@ -19,8 +20,21 @@ known_names = np.array(data["names"])
 all_students = set(known_names)
 present_students = set()
 
-# Initialize today's attendance (all ABSENT)
-init_today(all_students)
+# Attendance windows
+WINDOWS = [(time(7,30), time(10,0)), (time(10,30), time(13,0))]
+IST = ZoneInfo("Asia/Kolkata")
+
+def in_attendance_window(now=None):
+    now = now or datetime.now(IST).time()
+    for start, end in WINDOWS:
+        if start <= now <= end:
+            return True
+    return False
+
+# Initialize today's attendance only on working days
+today_str = datetime.now(IST).strftime("%Y-%m-%d")
+if is_working_day(today_str):
+    init_today(all_students)
 
 # ---------------- START CAMERA ----------------
 cap = cv2.VideoCapture(0)
@@ -46,7 +60,7 @@ while True:
         # Scale back box
         top, right, bottom, left = top*2, right*2, bottom*2, left*2
 
-        if best_dist < THRESHOLD:
+        if best_dist < THRESHOLD and in_attendance_window() and is_working_day(datetime.now(IST).strftime("%Y-%m-%d")):
             student_id = known_names[best_idx]
             accuracy = round((1 - best_dist) * 100, 2)
 

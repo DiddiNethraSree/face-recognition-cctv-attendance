@@ -7,11 +7,38 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+<style>
+    /* University Background */
+    .landing-page {
+        /* Tech/CCTV/Campus blended background */
+        background: linear-gradient(rgba(0, 0, 20, 0.75), rgba(0, 0, 40, 0.75)), url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1600&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+    }
+    .landing-header h1 {
+        color: #ffffff;
+        font-size: 3.5rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.5);
+        margin-bottom: 0.5rem;
+        white-space: nowrap; /* Force one line */
+    }
+    .landing-header p {
+        color: #00ffcc; /* Bright Cyan for high visibility */
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+    }
+</style>
 <body>
     <div class="landing-page">
         <div class="landing-header">
-            <h1>Face Attendance Portal</h1>
-            <p>Secure • Real-time • Intelligent</p>
+            <h1>FACE RECOGNITION FOR ALL STUDENTS</h1>
+            <p>Automated • Secure • Real-time Monitoring</p>
         </div>
 
         <!-- Role Selection Cards -->
@@ -22,11 +49,7 @@
                 <p style="color: var(--text-muted); font-size: 0.9rem;">Manage department eligibility & reports</p>
             </div>
 
-            <div class="role-card card-staff" onclick="selectRole('staff')">
-                <div class="role-icon">👨‍🏫</div>
-                <div class="role-title">Staff Portal</div>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Monitor student attendance & performance</p>
-            </div>
+            <!-- Staff Module Removed -->
 
             <div class="role-card card-student" onclick="selectRole('student')">
                 <div class="role-icon">🎓</div>
@@ -58,6 +81,10 @@
                     <input type="password" name="password" class="form-control" placeholder="Enter Password" required>
                 </div>
 
+                <div id="forgotPasswordLink" style="display: none; text-align: right; margin-bottom: 1rem;">
+                    <a href="/forgot-password" style="color: var(--role-student); font-size: 0.85rem; font-weight: 600;">Forgot Password?</a>
+                </div>
+
                 <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
                 <div style="text-align: center; margin-top: 1rem;">
                     <a href="#" onclick="resetSelection()" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: underline;">← Back to Role Selection</a>
@@ -82,16 +109,22 @@
             
             const titles = {
                 'hod': 'HOD Login',
-                'staff': 'Staff Login',
                 'student': 'Student Login'
             };
             document.getElementById('loginTitle').innerText = titles[role];
             
             // Set button color based on role
             const btn = document.getElementById('loginBtn');
-            if(role === 'hod') btn.style.backgroundColor = 'var(--role-hod)';
-            if(role === 'staff') btn.style.backgroundColor = 'var(--role-staff)';
-            if(role === 'student') btn.style.backgroundColor = 'var(--role-student)';
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            
+            if(role === 'hod') {
+                btn.style.backgroundColor = 'var(--role-hod)';
+                forgotLink.style.display = 'none';
+            }
+            if(role === 'student') {
+                btn.style.backgroundColor = 'var(--role-student)';
+                forgotLink.style.display = 'block';
+            }
         }
 
         function resetSelection() {

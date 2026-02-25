@@ -1,106 +1,277 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="app-container">
-    <div class="main-content">
-        <div class="dashboard-header">
-            <div>
-                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">HOD Dashboard</h1>
-                <p style="color: var(--text-muted);">Department Overview & Eligibility Reports</p>
-            </div>
-            <div style="text-align: right;">
-                <span class="status-badge" style="background: #e0e7ff; color: var(--primary);">System Online ●</span>
-            </div>
+<style>
+    /* HOD Specific Styles */
+    .hod-bg-container {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1600&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        min-height: 100vh;
+        padding: 2rem;
+        color: white;
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #1e293b;
+    }
+
+    .report-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #475569;
+        background: #e2e8f0;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .filter-btn:hover {
+        background: #cbd5e1;
+    }
+
+    .filter-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary-dark);
+    }
+
+    .generate-btn-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .gen-btn {
+        padding: 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .gen-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-detained { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+    .btn-condonation { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .btn-eligible { background: linear-gradient(135deg, #22c55e, #15803d); }
+
+    .result-list {
+        display: none; /* Hidden by default */
+        animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cctv-preview {
+        border: 4px solid #333;
+        background: #000;
+        color: #0f0;
+        padding: 1rem;
+        font-family: monospace;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    
+    .cctv-overlay {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+</style>
+
+<div class="hod-bg-container">
+    <div class="dashboard-header" style="margin-bottom: 2rem;">
+        <div>
+            <h1 style="font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">HOD PORTAL</h1>
+            <p style="opacity: 0.9; font-size: 1.1rem;">Higher Authority Portal • Verification & Reporting Module</p>
         </div>
-
-        <div class="stats-grid">
-            <div class="stat-card" style="border-left: 4px solid var(--success);">
-                <div class="stat-label">Eligible (>75%)</div>
-                <div class="stat-value">{{ eligible|length }}</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Students</div>
-            </div>
-            <div class="stat-card" style="border-left: 4px solid var(--warning);">
-                <div class="stat-label">Condonation (65-75%)</div>
-                <div class="stat-value">{{ condonation|length }}</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Students</div>
-            </div>
-            <div class="stat-card" style="border-left: 4px solid var(--danger);">
-                <div class="stat-label">Detained (<65%)</div>
-                <div class="stat-value">{{ detained|length }}</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Students</div>
-            </div>
-        </div>
-
-        <div class="hod-grid">
-            <!-- Eligible -->
-            <div class="card-panel">
-                <div class="panel-header" style="color: var(--success); border-top: 3px solid var(--success);">
-                    ✅ Eligible List
-                </div>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table>
-                        {% if eligible %}
-                            {% for s, p in eligible %}
-                            <tr>
-                                <td><b>{{ s }}</b></td>
-                                <td style="text-align: right;">
-                                    <span class="status-badge status-success">{{ p }}%</span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Empty</td></tr>
-                        {% endif %}
-                    </table>
-                </div>
-            </div>
-
-            <!-- Condonation -->
-            <div class="card-panel">
-                <div class="panel-header" style="color: var(--warning); border-top: 3px solid var(--warning);">
-                    ⚠️ Condonation List
-                </div>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table>
-                        {% if condonation %}
-                            {% for s, p in condonation %}
-                            <tr>
-                                <td><b>{{ s }}</b></td>
-                                <td style="text-align: right;">
-                                    <span class="status-badge status-warning">{{ p }}%</span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Empty</td></tr>
-                        {% endif %}
-                    </table>
-                </div>
-            </div>
-
-            <!-- Detained -->
-            <div class="card-panel">
-                <div class="panel-header" style="color: var(--danger); border-top: 3px solid var(--danger);">
-                    🚫 Detained List
-                </div>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table>
-                        {% if detained %}
-                            {% for s, p in detained %}
-                            <tr>
-                                <td><b>{{ s }}</b></td>
-                                <td style="text-align: right;">
-                                    <span class="status-badge status-danger">{{ p }}%</span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Empty</td></tr>
-                        {% endif %}
-                    </table>
-                </div>
-            </div>
+        <div style="text-align: right;">
+            <div class="live-clock" id="hod-clock" style="font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 8px;"></div>
+            <a href="/hod/add-student" class="filter-btn" style="margin-left: 1rem; background: var(--role-hod); color: white;">Add Student</a>
+            <span class="status-badge {% if is_today_working %}status-success{% else %}status-warning{% endif %}" style="margin-left:0.5rem;">
+                {% if is_today_working %}Working Day{% else %}No Attendance (Holiday/Sunday){% endif %}
+            </span>
+            <span class="status-badge" style="margin-left:0.5rem; background:#0ea5e9; color:white;">
+                Windows: {{ attendance_windows[0][0] }}–{{ attendance_windows[0][1] }}, {{ attendance_windows[1][0] }}–{{ attendance_windows[1][1] }}
+            </span>
         </div>
     </div>
+
+    <!-- Main Reporting Section -->
+    <div class="glass-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">Attendance Master Record</h2>
+            <div class="report-filters">
+                <a href="/hod?filter=7days" class="filter-btn {% if current_filter == '7days' %}active{% endif %}">Weekly Report</a>
+                <a href="/hod?filter=15days" class="filter-btn {% if current_filter == '15days' %}active{% endif %}">15 Days Report</a>
+                <a href="/hod?filter=30days" class="filter-btn {% if current_filter == '30days' %}active{% endif %}">Monthly Report</a>
+                <a href="/hod?filter=all" class="filter-btn {% if current_filter == 'all' %}active{% endif %}">All Time</a>
+            </div>
+        </div>
+
+        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <table class="styled-table" style="width: 100%;">
+                <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 10;">
+                    <tr>
+                        <th>Date</th>
+                        <th>Student ID</th>
+                        <th>Time In</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in master_list %}
+                    <tr>
+                        <td>{{ row[1] }}</td>
+                        <td><b>{{ row[0] }}</b></td>
+                        <td>{{ row[2] if row[2] else '--' }}</td>
+                        <td>
+                            {% if row[3] == 1 %}
+                            <span class="status-badge status-success">Present</span>
+                            {% else %}
+                            <span class="status-badge status-danger">Absent</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="generate-btn-group">
+        <button class="gen-btn btn-eligible" onclick="showList('eligibleList')">
+            ✅ Generate Eligibility List
+        </button>
+        <button class="gen-btn btn-condonation" onclick="showList('condonationList')">
+            ⚠️ Generate Condonation List
+        </button>
+        <button class="gen-btn btn-detained" onclick="showList('detainedList')">
+            🚫 Generate Detained List
+        </button>
+    </div>
+
+    <!-- Hidden Results Section -->
+    <div id="resultsContainer">
+        
+        <!-- Eligible List -->
+        <div id="eligibleList" class="glass-panel result-list" style="border-left: 5px solid var(--success);">
+            <h2 style="color: var(--success);">✅ Eligibility List (>= 75%)</h2>
+            <table class="styled-table">
+                <thead><tr><th>Student ID</th><th>Percentage</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for s, p in eligible %}
+                    <tr>
+                        <td>{{ s }}</td>
+                        <td><b>{{ p }}%</b></td>
+                        <td><span class="status-badge status-success">Eligible</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3">No students found in this category.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Condonation List -->
+        <div id="condonationList" class="glass-panel result-list" style="border-left: 5px solid var(--warning);">
+            <h2 style="color: var(--warning);">⚠️ Condonation List (65% - 75%)</h2>
+            <table class="styled-table">
+                <thead><tr><th>Student ID</th><th>Percentage</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for s, p in condonation %}
+                    <tr>
+                        <td>{{ s }}</td>
+                        <td><b>{{ p }}%</b></td>
+                        <td><span class="status-badge status-warning">Condonation Required</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3">No students found in this category.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Detained List -->
+        <div id="detainedList" class="glass-panel result-list" style="border-left: 5px solid var(--danger);">
+            <h2 style="color: var(--danger);">🚫 Detained List (< 65%)</h2>
+            <table class="styled-table">
+                <thead><tr><th>Student ID</th><th>Percentage</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for s, p in detained %}
+                    <tr>
+                        <td>{{ s }}</td>
+                        <td><b>{{ p }}%</b></td>
+                        <td><span class="status-badge status-danger">Detained</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3">No students found in this category.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
 </div>
+
+<script>
+    function showList(listId) {
+        // Hide all lists first
+        document.querySelectorAll('.result-list').forEach(el => el.style.display = 'none');
+        
+        // Show the selected list
+        const selected = document.getElementById(listId);
+        if(selected) {
+            selected.style.display = 'block';
+            selected.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Update HOD clock
+    function updateHodClock() {
+        const now = new Date();
+        document.getElementById('hod-clock').textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateHodClock, 1000);
+    updateHodClock();
+</script>
+
 {% endblock %}

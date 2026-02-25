@@ -1,85 +1,98 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="app-container">
-    <div class="main-content">
-        <div class="dashboard-header">
-            <div>
-                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">Hello, {{ student_id }} 👋</h1>
-                <p style="color: var(--text-muted);">Your Personal Attendance Report</p>
-            </div>
-        </div>
+<style>
+    /* University Background for Student Portal */
+    .student-bg-container {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        min-height: 100vh;
+        padding: 2rem;
+        color: white;
+    }
 
-        <div class="stats-grid fade-in">
-            <div class="stat-card">
-                <div class="stat-label">Current Attendance</div>
-                <div class="stat-value" style="color: {% if percent > 75 %}var(--success){% elif percent >= 65 %}var(--warning){% else %}var(--danger){% endif %};">
-                    {{ percent }}%
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar {% if percent > 75 %}bg-success{% elif percent >= 65 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ percent }}%;"></div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Classes Attended</div>
-                <div class="stat-value">
-                    {% set present_count = 0 %}
-                    {% for d, p in records %}
-                        {% if p %}{% set present_count = present_count + 1 %}{% endif %}
-                    {% endfor %}
-                    {{ records|selectattr("1")|list|length }} / {{ records|length }}
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #1e293b;
+    }
+</style>
+
+<div class="student-bg-container">
+    <div class="app-container" style="background: transparent; box-shadow: none;">
+        <div class="main-content">
+            <div class="dashboard-header" style="text-align: center; margin-bottom: 2rem;">
+                <div>
+                    <h1 style="font-size: 2.2rem; font-weight: 800; color: white; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">FACE ATTENDANCE SYSTEM FOR ALL STUDENTS</h1>
+                    <p style="color: #cbd5e1; font-size: 1.1rem;">My Attendance Portal • {{ student_id }}</p>
+                    <div style="margin-top: 0.5rem;">
+                        <span class="status-badge {% if is_today_working %}status-success{% else %}status-warning{% endif %}">
+                            {% if is_today_working %}Working Day{% else %}No Attendance (Holiday/Sunday){% endif %}
+                        </span>
+                        <span class="status-badge" style="margin-left:0.5rem; background:#0ea5e9; color:white;">
+                            Windows: {{ attendance_windows[0][0] }}–{{ attendance_windows[0][1] }}, {{ attendance_windows[1][0] }}–{{ attendance_windows[1][1] }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-label">Eligibility Status</div>
-                <div class="stat-value" style="font-size: 1.5rem;">
-                    {% if percent > 75 %}
-                        <span class="status-badge status-success" style="font-size: 1rem; padding: 0.5rem 1rem;">✅ Eligible</span>
-                    {% elif percent >= 65 %}
-                        <span class="status-badge status-warning" style="font-size: 1rem; padding: 0.5rem 1rem;">⚠️ Condonation</span>
-                    {% else %}
-                        <span class="status-badge status-danger" style="font-size: 1rem; padding: 0.5rem 1rem;">🚫 Detained</span>
-                    {% endif %}
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <div class="stat-label">Total Classes</div>
+                    <div class="stat-value">{{ records|length }}</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-label">Present Days</div>
+                    <div class="stat-value" style="color: var(--success);">{{ records|selectattr('1', 'equalto', 1)|list|length }}</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-label">Current Attendance</div>
+                    <div class="stat-value" style="color: {% if percent > 75 %}var(--success){% elif percent >= 65 %}var(--warning){% else %}var(--danger){% endif %};">
+                        {{ percent }}%
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar {% if percent > 75 %}bg-success{% elif percent >= 65 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ percent }}%;"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card-panel fade-in" style="animation-delay: 0.1s;">
-            <div class="panel-header">
-                📅 Attendance History
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Day</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d, p in records %}
-                    <tr>
-                        <td>{{ d }}</td>
-                        <td style="color: var(--text-muted);">--</td>
-                        <td>
-                            {% if p %}
-                                <span class="status-badge status-success">Present</span>
+            <div class="card-panel glass-card" style="margin-top: 2rem;">
+                <div class="panel-header">
+                    📅 Attendance History
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in records %}
+                            <tr>
+                                <td>{{ r[0] }}</td>
+                                <td>
+                                    {% if r[1] == 1 %}
+                                    <span class="status-badge status-success">Present</span>
+                                    {% else %}
+                                    <span class="status-badge status-danger">Absent</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
                             {% else %}
-                                <span class="status-badge status-danger">Absent</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                            No attendance records yet.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <tr><td colspan="2">No records found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
